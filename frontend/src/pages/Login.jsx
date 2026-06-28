@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
+import Input from "../components/UI/Input";
+import Button from "../components/UI/Button";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,7 +14,6 @@ export default function Login() {
     try {
       setError("");
       await login({ email, password });
-      // Redirect logical handle yahan ho jayega auth state change par
     } catch (err) {
       setError("Invalid credentials or authentication endpoint error.");
     }
@@ -42,38 +43,27 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-              Email Endpoint
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-slate-200 transition-colors"
-              placeholder="name@company.com"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-              Security Token
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-slate-200 transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg text-sm shadow-lg shadow-blue-600/10 transition-all mt-2"
-          >
+          <Input
+            label="Email Endpoint"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@company.com"
+            required
+          />
+
+          <Input
+            label="Security Token"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+
+          <Button type="submit" variant="primary" className="w-full mt-2">
             Authenticate Access
-          </button>
+          </Button>
         </form>
       </div>
     </div>

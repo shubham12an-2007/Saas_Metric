@@ -1,5 +1,7 @@
 import React from "react";
 import SpendChart from "../components/Charts/SpendChart";
+import Card from "../components/UI/Card";
+import Button from "../components/UI/Button";
 
 export default function Dashboard() {
   const stats = [
@@ -20,6 +22,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-8 space-y-8 bg-slate-50 min-h-screen w-full">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
@@ -29,17 +32,13 @@ export default function Dashboard() {
             Track and optimize your operational recurring costs.
           </p>
         </div>
-        <button className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-all">
-          + Add Subscription
-        </button>
+        <Button variant="primary">+ Add Subscription</Button>
       </div>
 
+      {/* Top Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col justify-between"
-          >
+          <Card key={stat.title}>
             <span className="text-sm font-medium text-slate-400">
               {stat.title}
             </span>
@@ -59,23 +58,21 @@ export default function Dashboard() {
                 {stat.change}
               </span>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
+      {/* Analytics Chart Block */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Render actual chart component inside the block */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Spending Over Time
-            </h3>
-          </div>
+        <Card title="Spending Over Time" className="lg:col-span-2">
           <SpendChart />
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-center text-slate-400 text-sm">
-          Upcoming Renewals List Placeholder
-        </div>
+        </Card>
+
+        <Card title="Upcoming Renewals">
+          <div className="text-sm text-slate-400 flex items-center justify-center h-full min-h-[250px]">
+            No upcoming renewals this week
+          </div>
+        </Card>
       </div>
     </div>
   );
