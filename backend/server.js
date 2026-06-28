@@ -5,6 +5,8 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./src/config/db");
+const authRoutes = require("./src/routes/auth.routes");
+const subscriptionRoutes = require("./src/routes/subscription.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +20,9 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 const startServer = async () => {
   await connectDB();
