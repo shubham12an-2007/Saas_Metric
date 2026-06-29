@@ -22,12 +22,12 @@ export const authService = {
 
 // Subscription Core Operations Service
 export const subscriptionService = {
-  getAll: () => api.get("/subscriptions"),
-  getById: (id) => api.get(`/subscriptions/${id}`),
-  create: (data) => api.post("/subscriptions", data),
-  update: (id, data) => api.put(`/subscriptions/${id}`, data),
-  delete: (id) => api.delete(`/subscriptions/${id}`),
-  getAnalytics: () => api.get("/subscriptions/analytics"),
+  getAll: () => api.get("/subscription"),
+  getById: (id) => api.get(`/subscription/${id}`),
+  create: (data) => api.post("/subscription/add", data),
+  update: (id, data) => api.put(`/subscription/${id}`, data),
+  delete: (id) => api.delete(`/subscription/${id}`),
+  getAnalytics: () => api.get("/subscription/analytics"),
 };
 
 export default api;

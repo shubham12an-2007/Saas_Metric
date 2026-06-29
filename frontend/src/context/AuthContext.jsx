@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         const response = await authService.getProfile();
-        setUser(response.data.user);
+        setUser(response.data.user || response.data);
       } catch (err) {
         setUser(null);
       } finally {
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const response = await authService.login(credentials);
-      setUser(response.data.user);
+      setUser(response.data.user || response.data);
       return response.data;
     } catch (err) {
       setError(err.response?.data?.message || "Authentication failed");
