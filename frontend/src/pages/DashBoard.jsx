@@ -26,18 +26,13 @@ export default function Dashboard() {
   // 1. Fetch Backend Stats Pipeline
   const fetchDashboardStats = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/subscriptions/stats",
-        {
-          withCredentials: true,
-        },
-      );
-      setStatsData(response.data.stats);
+      // 🔥 Yeh ab automatic '/api/subscription/stats' ko call karega
+      const response = await subscriptionService.getAnalytics();
+
+      // Backend se jo bhi response aaye (agar direct object hai ya data.stats hai)
+      setStatsData(response.data.stats || response.data);
     } catch (err) {
-      console.error(
-        "Failed fetching database stats:",
-        err.response?.data || err.message,
-      );
+      console.error("Failed fetching database stats:", err);
     } finally {
       setLoading(false);
     }

@@ -22,12 +22,18 @@ export const authService = {
 
 // Subscription Core Operations Service
 export const subscriptionService = {
-  getAll: () => api.get("/subscription"),
+  // 1. Backend me tumhara route '/all' hai
+  getAll: () => api.get("/subscription/all"),
+
   getById: (id) => api.get(`/subscription/${id}`),
+
+  // 2. Backend me tumhara route '/add' hai (Yeh pehle se chal raha tha)
   create: (data) => api.post("/subscription/add", data),
+
   update: (id, data) => api.put(`/subscription/${id}`, data),
   delete: (id) => api.delete(`/subscription/${id}`),
-  getAnalytics: () => api.get("/subscription/analytics"),
-};
 
+  // 3. Backend me tumhara route '/stats' hai
+  getAnalytics: () => api.get("/subscription/stats"),
+};
 export default api;
