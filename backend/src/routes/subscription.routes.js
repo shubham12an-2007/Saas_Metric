@@ -22,4 +22,18 @@ router.get(
   subscriptionController.getSubscriptionStats,
 );
 
+// delete route
+router.delete(
+  "/:id",
+  authMiddleware.protectRoute,
+  subscriptionController.deleteSubscription,
+);
+
+// edit route
+router.put(
+  "/:id",
+  authMiddleware.protectRoute,
+  subscriptionController.updateSubscription,
+);
+
 module.exports = router;

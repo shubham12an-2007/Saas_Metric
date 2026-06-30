@@ -75,4 +75,60 @@ async function getSubscriptionStats(req, res) {
   }
 }
 
-module.exports = { addSubscription, getUserSubscription, getSubscriptionStats };
+async function deleteSubscription(req, res) {
+  const id = req.params.id;
+
+  try {
+    const deletedSubscription = await subscriptionModel.findByIdAndDelete(id);
+
+    if (!deletedSubscription) {
+      return res.status(404).json({
+        message: "Subscription not found in MongoDB database cluster.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Subscription deleted Successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete the Subscription",
+      error: error.message,
+    });
+  }
+}
+
+async function updateSubscription(req, res) {
+  const id = req.params.id;
+
+  try {
+    const updateSubscription = await subscriptionModel.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true },
+    );
+
+    if (!updateSubscription) {
+      return res.status(404).json({
+        message: "Subscription not found in MongoDB database cluster.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Subscription edited successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update  the Subscription",
+      error: error.message,
+    });
+  }
+}
+
+module.exports = {
+  addSubscription,
+  getUserSubscription,
+  getSubscriptionStats,
+  deleteSubscription,
+  updateSubscription,
+};
