@@ -36,4 +36,11 @@ router.put(
   subscriptionController.updateSubscription,
 );
 
+// subsscription analytics
+router.get(
+  "/category-analytics",
+  authMiddleware.protectRoute,
+  subscriptionController.getCategoryAnalytics,
+);
+
 module.exports = router;

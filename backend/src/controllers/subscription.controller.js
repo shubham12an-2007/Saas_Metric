@@ -125,10 +125,46 @@ async function updateSubscription(req, res) {
   }
 }
 
+// get Chart analytics
+async function getCategoryAnalytics(req, res) {
+  try {
+    // Aggregation pipeline to group by category
+    const analytics = await subscriptionModel.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalSpend: { $sum: "$price" },
+          count: { $sum: 1 },
+        },
+      },
+      // 3. Format ko clean karo
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          totalSpend: 1,
+          count: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      analytics,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch category analytics",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   addSubscription,
   getUserSubscription,
   getSubscriptionStats,
   deleteSubscription,
   updateSubscription,
+  getCategoryAnalytics,
 };

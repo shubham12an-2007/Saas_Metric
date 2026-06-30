@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
-// Purana 'import axios from "axios"' hata do, aur apna service import karo
 import { subscriptionService } from "../services/api";
+// 🔥 Live Chart Elements
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 import SpendChart from "../components/Charts/SpendChart";
 import Card from "../components/UI/Card";
 import Button from "../components/UI/Button";
@@ -12,8 +20,9 @@ export default function Dashboard() {
     activeCount: 0,
     totalSubscriptions: 0,
   });
+  const [chartData, setChartData] = useState([]); // 🔥 State for category analytics
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal control state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -23,14 +32,27 @@ export default function Dashboard() {
     nextBilling: "",
   });
 
-  // 1. Fetch Backend Stats Pipeline
+  // Chart Sections Color Palette
+  const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
+
+  // 1. Fetch Backend Stats & Chart Data Pipelines
   const fetchDashboardStats = async () => {
     try {
-      // 🔥 Yeh ab automatic '/api/subscription/stats' ko call karega
-      const response = await subscriptionService.getAnalytics();
+      // Metric Numbers Call
+      const statsResponse = await subscriptionService.getAnalytics();
+      setStatsData(statsResponse.data.stats || statsResponse.data);
 
-      // Backend se jo bhi response aaye (agar direct object hai ya data.stats hai)
-      setStatsData(response.data.stats || response.data);
+      // 🔥 Category Chart Data Call (Safe-try catch inside to prevent crash)
+      try {
+        const chartResponse = await subscriptionService.getCategoryAnalytics();
+        const formattedData = chartResponse.data.analytics.map((item) => ({
+          name: item.category,
+          value: item.totalSpend,
+        }));
+        setChartData(formattedData);
+      } catch (chartErr) {
+        console.error("Failed fetching category chart data:", chartErr);
+      }
     } catch (err) {
       console.error("Failed fetching database stats:", err);
     } finally {
@@ -54,9 +76,7 @@ export default function Dashboard() {
       };
 
       console.log("Hitting secured service endpoint...");
-
-      // 🔥 Yeh tumhare api.js ke secure instance se request bhejega
-      const response = await subscriptionService.create(payload);
+      await subscriptionService.create(payload);
 
       alert("Asset deployed into MongoDB successfully!");
       setIsModalOpen(false);
@@ -66,15 +86,15 @@ export default function Dashboard() {
         price: "",
         nextBilling: "",
       });
-      fetchDashboardStats(); // Dashboard ke data ko live refresh karega
+      fetchDashboardStats();
     } catch (err) {
       console.error("Pipeline failure:", err);
-      // Agar abhi bhi error aaye, toh exact server ka error message screen par dikhega
       alert(
         `Backend Refusal: ${err.response?.data?.message || "Status Code " + err.response?.status}`,
       );
     }
   };
+
   if (loading) {
     return (
       <div className="p-8 text-slate-500 font-mono">
@@ -83,7 +103,6 @@ export default function Dashboard() {
     );
   }
 
-  // Map backend stats to your original UI Layout structure
   const dynamicStats = [
     {
       title: "Monthly Spend",
@@ -117,7 +136,6 @@ export default function Dashboard() {
             Track and optimize your operational recurring costs.
           </p>
         </div>
-        {/* 🔥 FIX: Connected button to open Form Modal */}
         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
           + Add Subscription
         </Button>
@@ -149,14 +167,55 @@ export default function Dashboard() {
         <Card title="Spending Over Time" className="lg:col-span-2">
           <SpendChart />
         </Card>
-        <Card title="Upcoming Renewals">
-          <div className="text-sm text-slate-400 flex items-center justify-center h-full min-h-[250px]">
-            No upcoming renewals this week
-          </div>
+
+        {/* 🔥 NEW DYNAMIC PIE CHART CARD REPLACE */}
+        <Card title="Spend Distribution">
+          {chartData.length === 0 ? (
+            <div className="text-sm text-slate-400 flex items-center justify-center h-full min-h-[250px]">
+              No active metrics found. Add subscriptions to view matrix.
+            </div>
+          ) : (
+            <div className="h-64 w-full mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      border: "1px solid #e2e8f0",
+                      color: "#0f172a",
+                    }}
+                    formatter={(value) => [`$${value}`, "Total Cost"]}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* 📥 DYNAMIC FLOATING MODAL FORM FOR ADDING ASSET */}
+      {/* 📥 FLOATING MODAL FORM FOR ADDING ASSET */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-2xl w-full max-w-md text-slate-900">
