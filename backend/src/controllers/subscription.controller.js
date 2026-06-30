@@ -160,6 +160,39 @@ async function getCategoryAnalytics(req, res) {
   }
 }
 
+// get upcoming subs
+async function getUpcomingSubs(req, res) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+    sevenDaysFromNow.setHours(23, 59, 59, 999);
+
+    // 3. MongoDB / Mongoose Query
+    const upcomingSubscriptions = await subscriptionModel
+      .find({
+        nextBilling: {
+          $gte: today,
+          $lte: sevenDaysFromNow,
+        },
+      })
+      .sort({ nextBilling: 1 });
+
+    // 4. Return Data to Frontend
+    res.status(200).json({
+      success: true,
+      upcoming: upcomingSubscriptions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch upcoming cluster alerts.",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   addSubscription,
   getUserSubscription,
@@ -167,4 +200,5 @@ module.exports = {
   deleteSubscription,
   updateSubscription,
   getCategoryAnalytics,
+  getUpcomingSubs,
 };

@@ -43,4 +43,10 @@ router.get(
   subscriptionController.getCategoryAnalytics,
 );
 
+router.get(
+  "/upcoming",
+  authMiddleware.protectRoute,
+  subscriptionController.getUpcomingSubs,
+);
+
 module.exports = router;

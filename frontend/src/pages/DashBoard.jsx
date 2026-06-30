@@ -20,7 +20,8 @@ export default function Dashboard() {
     activeCount: 0,
     totalSubscriptions: 0,
   });
-  const [chartData, setChartData] = useState([]); // 🔥 State for category analytics
+  const [chartData, setChartData] = useState([]);
+  const [upcomingSubs, setUpcomingSubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -52,6 +53,16 @@ export default function Dashboard() {
         setChartData(formattedData);
       } catch (chartErr) {
         console.error("Failed fetching category chart data:", chartErr);
+      }
+
+      try {
+        const upcomingResponse =
+          await subscriptionService.getUpcomingRenewals();
+        setUpcomingSubs(
+          upcomingResponse.data.upcoming || upcomingResponse.data,
+        );
+      } catch (upcomingErr) {
+        console.error("Failed fetching upcoming renewals:", upcomingErr);
       }
     } catch (err) {
       console.error("Failed fetching database stats:", err);
@@ -163,12 +174,14 @@ export default function Dashboard() {
       </div>
 
       {/* Analytics Chart Block */}
+      {/* Analytics Chart & Upcoming Renewals Block */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 1. Spending Over Time (Left Side - Bada Card) */}
         <Card title="Spending Over Time" className="lg:col-span-2">
           <SpendChart />
         </Card>
 
-        {/* 🔥 NEW DYNAMIC PIE CHART CARD REPLACE */}
+        {/* 2. Spend Distribution Pie Chart (Right Side - Chota Card) */}
         <Card title="Spend Distribution">
           {chartData.length === 0 ? (
             <div className="text-sm text-slate-400 flex items-center justify-center h-full min-h-[250px]">
@@ -210,6 +223,57 @@ export default function Dashboard() {
                   />
                 </PieChart>
               </ResponsiveContainer>
+            </div>
+          )}
+        </Card>
+
+        {/* 🔥 3. NEW DYNAMIC UPCOMING RENEWALS CARD (Yeh niche full-width ya flexible grid me set ho jayega) */}
+        <Card title="Upcoming Renewals" className="lg:col-span-3">
+          {upcomingSubs.length === 0 ? (
+            <div className="text-sm text-slate-400 flex items-center justify-center p-6 text-center">
+              No upcoming renewals this week. All systems clear! 🎉
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {upcomingSubs.map((sub) => {
+                const daysLeft = Math.ceil(
+                  (new Date(sub.nextBilling) - new Date()) /
+                    (1000 * 60 * 60 * 24),
+                );
+
+                return (
+                  <div
+                    key={sub._id}
+                    className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm"
+                  >
+                    <div>
+                      <h4 className="font-semibold text-sm text-slate-900">
+                        {sub.name}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-mono">
+                        {new Date(sub.nextBilling).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-mono font-bold text-slate-900 block">
+                        ${sub.price}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          daysLeft <= 2
+                            ? "bg-red-50 text-red-600"
+                            : "bg-amber-50 text-amber-600"
+                        }`}
+                      >
+                        {daysLeft <= 0 ? "Today" : `In ${daysLeft} days`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </Card>
