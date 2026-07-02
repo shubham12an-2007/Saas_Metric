@@ -1,4 +1,5 @@
 const subscriptionModel = require("../models/Subscription.model");
+const activityModel = require("../models/activity.model");
 
 async function addSubscription(req, res) {
   try {
@@ -17,6 +18,12 @@ async function addSubscription(req, res) {
       price: Number(price),
       nextBilling,
     });
+
+    await activityModel.create({
+      action: "CREATED",
+      message: `New subscription "${req.body.name}" was successfully added.`,
+    });
+
     res.status(201).json({
       message: "Subscription tracked successfully",
       subscription,
@@ -112,13 +119,18 @@ async function updateSubscription(req, res) {
       updateData,
       {
         new: true,
-        runValidators: false,
+        runValidators: false, // 👈 ISE EK BAAR FALSE KARKE DEKHO!
       },
     );
 
     if (!updatedSubscription) {
       return res.status(404).json({ message: "Subscription not found" });
     }
+
+    await Activity.create({
+      action: "DELETED",
+      message: `Subscription was removed from the system.`,
+    });
 
     res.status(200).json({ success: true, updatedSubscription });
   } catch (error) {
@@ -190,6 +202,18 @@ async function getUpcomingSubs(req, res) {
   }
 }
 
+// fetch logs controller
+async function getActivityLogs(req, res) {
+  try {
+    const logs = await Activity.find().sort({ createdAt: -1 }).limit(20); // Latest 20 logs ascending/descending order me
+    res.status(200).json({ success: true, logs });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch logs", error: error.message });
+  }
+}
+
 module.exports = {
   addSubscription,
   getUserSubscription,
@@ -198,4 +222,5 @@ module.exports = {
   updateSubscription,
   getCategoryAnalytics,
   getUpcomingSubs,
+  getActivityLogs,
 };

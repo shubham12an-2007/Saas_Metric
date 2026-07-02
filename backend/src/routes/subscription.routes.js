@@ -49,4 +49,11 @@ router.get(
   subscriptionController.getUpcomingSubs,
 );
 
+// get activity logs
+router.get(
+  "/logs",
+  authMiddleware.protectRoute,
+  subscriptionController.getActivityLogs,
+);
+
 module.exports = router;

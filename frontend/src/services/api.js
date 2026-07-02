@@ -30,8 +30,9 @@ export const subscriptionService = {
 
   getCategoryAnalytics: () => api.get("/subscription/category-analytics"),
 
-  // src/services/api.js ke andar naya endpoint map karo:
   getUpcomingRenewals: () => api.get("/subscription/upcoming"),
+
+  getActivityLogs: () => api.get("/subscription/logs"),
 };
 
 export default api;

@@ -37,6 +37,8 @@ export default function Dashboard() {
   // Chart Sections Color Palette
   const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
+  const [logs, setLogs] = useState([]); // 🔥 Activity logs ke liye state
+
   // 1. Fetch Backend Stats & Chart Data Pipelines
   const fetchDashboardStats = async () => {
     try {
@@ -64,6 +66,13 @@ export default function Dashboard() {
         );
       } catch (upcomingErr) {
         console.error("Failed fetching upcoming renewals:", upcomingErr);
+      }
+
+      try {
+        const logsResponse = await subscriptionService.getActivityLogs();
+        setLogs(logsResponse.data.logs || logsResponse.data);
+      } catch (logsErr) {
+        console.error("Failed fetching activity logs:", logsErr);
       }
     } catch (err) {
       console.error("Failed fetching database stats:", err);
@@ -275,6 +284,48 @@ export default function Dashboard() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <Card title="Activity History & Audit Logs">
+          {logs.length === 0 ? (
+            <div className="text-sm text-slate-400 p-6 text-center">
+              No recent activities recorded yet.
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-2">
+              {logs.map((log, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100"
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                      log.action === "CREATED"
+                        ? "bg-green-500"
+                        : log.action === "UPDATED"
+                          ? "bg-blue-500"
+                          : "bg-red-500"
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-700 font-medium">
+                      {log.message}
+                    </p>
+                    <p className="text-xs text-slate-400 font-mono mt-0.5">
+                      {new Date(log.createdAt).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </Card>
