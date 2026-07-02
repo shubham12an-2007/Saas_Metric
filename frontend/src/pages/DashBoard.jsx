@@ -31,6 +31,7 @@ export default function Dashboard() {
     category: "Entertainment",
     price: "",
     nextBilling: "",
+    status: "Active",
   });
 
   // Chart Sections Color Palette
@@ -347,6 +348,23 @@ export default function Dashboard() {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-500 text-slate-900"
                 />
               </div>
+
+              <div>
+                <label className="text-xs text-slate-500 block mb-1">
+                  Initial Status
+                </label>
+                <select
+                  value={formData.status || "Active"} // By default 'Active' rahega
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-500 text-slate-900"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive / Paused</option>
+                </select>
+              </div>
+
               <div className="flex space-x-3 mt-6">
                 <button
                   type="button"

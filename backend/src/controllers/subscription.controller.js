@@ -47,7 +47,10 @@ async function getUserSubscription(req, res) {
 
 async function getSubscriptionStats(req, res) {
   try {
-    const subs = await subscriptionModel.find({ user: req.user.id });
+    const subs = await subscriptionModel.find({
+      user: req.user.id,
+      status: "Active",
+    });
 
     let totalMonthlySpend = 0;
     let activeCount = 0;
@@ -97,39 +100,40 @@ async function deleteSubscription(req, res) {
     });
   }
 }
-
 async function updateSubscription(req, res) {
-  const id = req.params.id;
-
   try {
-    const updateSubscription = await subscriptionModel.findByIdAndUpdate(
+    const { id } = req.params;
+    const updateData = req.body;
+
+    console.log("Updating sub ID:", id, "with data:", updateData);
+
+    const updatedSubscription = await subscriptionModel.findByIdAndUpdate(
       id,
-      req.body,
-      { new: true, runValidators: true },
+      updateData,
+      {
+        new: true,
+        runValidators: false,
+      },
     );
 
-    if (!updateSubscription) {
-      return res.status(404).json({
-        message: "Subscription not found in MongoDB database cluster.",
-      });
+    if (!updatedSubscription) {
+      return res.status(404).json({ message: "Subscription not found" });
     }
 
-    res.status(200).json({
-      message: "Subscription edited successfully",
-    });
+    res.status(200).json({ success: true, updatedSubscription });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to update  the Subscription",
-      error: error.message,
-    });
+    console.error("Update controller error:", error);
+    res.status(500).json({ message: error.message });
   }
 }
-
 // get Chart analytics
 async function getCategoryAnalytics(req, res) {
   try {
-    // Aggregation pipeline to group by category
     const analytics = await subscriptionModel.aggregate([
+      {
+        $match: { status: "Active" },
+      },
+
       {
         $group: {
           _id: "$category",
@@ -137,7 +141,6 @@ async function getCategoryAnalytics(req, res) {
           count: { $sum: 1 },
         },
       },
-      // 3. Format ko clean karo
       {
         $project: {
           _id: 0,
@@ -148,15 +151,9 @@ async function getCategoryAnalytics(req, res) {
       },
     ]);
 
-    res.status(200).json({
-      success: true,
-      analytics,
-    });
+    res.status(200).json({ success: true, analytics });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch category analytics",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Failed analytics", error: error.message });
   }
 }
 

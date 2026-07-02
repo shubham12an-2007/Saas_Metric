@@ -35,6 +35,21 @@ function MySubscriptions() {
     }
   };
 
+  const handleStatusToggle = async (sub) => {
+    try {
+      const newStatus = sub.status === "Active" ? "Inactive" : "Active";
+
+      // Hum backend ke vahi update controller ko hit karenge jo tumne pehle banaya thaa!
+      await subscriptionService.update(sub._id, { status: newStatus });
+
+      alert(`Status updated to ${newStatus}!`);
+      loadSubs(); // Table reload data live
+    } catch (err) {
+      console.error("Status toggle failed:", err);
+      alert(`Backend Refusal: ${err.response?.data?.message || err.message}`);
+    }
+  };
+
   useEffect(() => {
     loadSubs();
   }, []);
@@ -142,6 +157,20 @@ function MySubscriptions() {
                       {sub.category}
                     </span>
                   </td>
+
+                  <td className="p-4">
+                    <button
+                      onClick={() => handleStatusToggle(sub)}
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border cursor-pointer transition ${
+                        sub.status === "Inactive"
+                          ? "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
+                          : "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                      }`}
+                    >
+                      {sub.status || "Active"} 🔄
+                    </button>
+                  </td>
+
                   <td className="p-4 font-mono font-medium text-slate-900">
                     ${sub.price}
                   </td>
