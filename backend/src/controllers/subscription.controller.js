@@ -217,17 +217,15 @@ async function getActivityLogs(req, res) {
 }
 
 // getBudget
+
 async function getBudget(req, res) {
   try {
-    let budget = await budgetModel.findOne({ userId: "default_user" });
+    const userId = req.user?.id || "default_user";
 
+    let budget = await Budget.findOne({ userId });
     if (!budget) {
-      budget = await Budget.create({
-        userId: "default_user",
-        monthlyLimit: 100,
-      });
+      budget = await Budget.create({ userId, monthlyLimit: 100 });
     }
-
     res.status(200).json({ success: true, budget });
   } catch (error) {
     res
@@ -236,21 +234,24 @@ async function getBudget(req, res) {
   }
 }
 
+// update budget
 async function updateBudget(req, res) {
   try {
     const { monthlyLimit } = req.body;
-    const budget = await budgetModel.findOneAndUpdate(
-      { userId: "default_user" },
+    const userId = req.user?.id || "default_user";
+
+    const budget = await Budget.findOneAndUpdate(
+      { userId },
       { monthlyLimit: Number(monthlyLimit) },
       { new: true, upsert: true },
     );
+    res.status(200).json({ success: true, budget });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to update budget: ", error: error.message });
+      .json({ message: "Failed to update budget", error: error.message });
   }
 }
-
 module.exports = {
   addSubscription,
   getUserSubscription,

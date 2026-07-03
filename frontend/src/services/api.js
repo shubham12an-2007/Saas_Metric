@@ -33,6 +33,10 @@ export const subscriptionService = {
   getUpcomingRenewals: () => api.get("/subscription/upcoming"),
 
   getActivityLogs: () => api.get("/subscription/logs"),
+
+  getBudget: () => api.get("/subscription/budget"),
+  updateBudget: (limit) =>
+    api.put("/subscription/budget", { monthlyLimit: limit }),
 };
 
 export default api;
