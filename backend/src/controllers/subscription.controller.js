@@ -1,5 +1,6 @@
 const subscriptionModel = require("../models/Subscription.model");
 const activityModel = require("../models/activity.model");
+const budgetModel = require("../models/budget.model");
 
 async function addSubscription(req, res) {
   try {
@@ -107,6 +108,7 @@ async function deleteSubscription(req, res) {
     });
   }
 }
+
 async function updateSubscription(req, res) {
   try {
     const { id } = req.params;
@@ -214,6 +216,41 @@ async function getActivityLogs(req, res) {
   }
 }
 
+// getBudget
+async function getBudget(req, res) {
+  try {
+    let budget = await budgetModel.findOne({ userId: "default_user" });
+
+    if (!budget) {
+      budget = await Budget.create({
+        userId: "default_user",
+        monthlyLimit: 100,
+      });
+    }
+
+    res.status(200).json({ success: true, budget });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to get budget", error: error.message });
+  }
+}
+
+async function updateBudget(req, res) {
+  try {
+    const { monthlyLimit } = req.body;
+    const budget = await budgetModel.findOneAndUpdate(
+      { userId: "default_user" },
+      { monthlyLimit: Number(monthlyLimit) },
+      { new: true, upsert: true },
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to update budget: ", error: error.message });
+  }
+}
+
 module.exports = {
   addSubscription,
   getUserSubscription,
@@ -223,4 +260,6 @@ module.exports = {
   getCategoryAnalytics,
   getUpcomingSubs,
   getActivityLogs,
+  getBudget,
+  updateBudget,
 };

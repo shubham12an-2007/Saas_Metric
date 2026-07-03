@@ -56,4 +56,10 @@ router.get(
   subscriptionController.getActivityLogs,
 );
 
+// get Budget
+router.get("/budget", subscriptionController.getBudget);
+
+// update budget
+router.put("/budget", subscriptionController.updateBudget);
+
 module.exports = router;
