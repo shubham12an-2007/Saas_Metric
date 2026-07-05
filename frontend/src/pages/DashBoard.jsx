@@ -24,6 +24,39 @@ export default function Dashboard() {
     activeCount: 0,
     totalSubscriptions: 0,
   });
+
+  // Naya state jo humne abhi banaya hai list ko chalane ke liye
+  const [subscriptions, setSubscriptions] = useState([
+    {
+      id: 1,
+      name: "Netflix Premium",
+      price: 649,
+      category: "Entertainment",
+      date: "2026-07-08",
+    },
+    {
+      id: 2,
+      name: "AWS Cloud Hosting",
+      price: 2499,
+      category: "Software",
+      date: "2026-07-25",
+    },
+    {
+      id: 3,
+      name: "Spotify Premium",
+      price: 119,
+      category: "Music",
+      date: "2026-07-05",
+    },
+  ]);
+
+  // Temporary delete function taaki testing ke waqt error na aaye
+  const handleDelete = (id, price) => {
+    setSubscriptions(
+      subscriptions.filter((sub) => sub.id !== id && sub._id !== id),
+    );
+  };
+
   const totalMonthlySpend = statsData?.totalMonthlySpend || 0;
 
   const [chartData, setChartData] = useState([]);
@@ -34,6 +67,7 @@ export default function Dashboard() {
   const [budgetLimit, setBudgetLimit] = useState(100); // Default budget
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [newBudgetInput, setNewBudgetInput] = useState("");
+  const [renewalDate, setRenewalDate] = useState("");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -191,6 +225,119 @@ export default function Dashboard() {
         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
           + Add Subscription
         </Button>
+      </div>
+
+      {/* --- STEP 3: ACTIVE TRACKERS & DEADLINES COUNTER --- */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100">
+          <h3 className="text-lg font-semibold text-slate-900">
+            Active Trackers & Renewals
+          </h3>
+          <p className="text-xs text-slate-500">
+            Live tracker for your upcoming subscription billing cycles.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="p-4">Subscription Name</th>
+                <th className="p-4">Category</th>
+                <th className="p-4">Monthly Cost</th>
+                <th className="p-4">Status / Days Left</th>
+                <th className="p-4 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+              {subscriptions &&
+                subscriptions.map((sub) => {
+                  // Live Days Calculation Logic
+                  const today = new Date();
+                  const expiry = sub.date ? new Date(sub.date) : null;
+                  let statusBadge = (
+                    <span className="text-slate-400 italic">No Date Set</span>
+                  );
+
+                  if (expiry) {
+                    const diffTime = expiry - today;
+                    const diffDays = Math.ceil(
+                      diffTime / (1000 * 60 * 60 * 24),
+                    );
+
+                    if (diffDays < 0) {
+                      statusBadge = (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                          Expired ❌
+                        </span>
+                      );
+                    } else if (diffDays === 0) {
+                      statusBadge = (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 animate-pulse">
+                          ⚠️ Renews TODAY!
+                        </span>
+                      );
+                    } else if (diffDays <= 3) {
+                      statusBadge = (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                          🚨 Only {diffDays} days left!
+                        </span>
+                      );
+                    } else {
+                      statusBadge = (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          In {diffDays} days
+                        </span>
+                      );
+                    }
+                  }
+
+                  return (
+                    <tr
+                      key={sub.id || sub._id}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="p-4 font-semibold text-slate-900">
+                        {sub.name}
+                      </td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                          {sub.category || "General"}
+                        </span>
+                      </td>
+                      <td className="p-4 font-medium text-slate-900">
+                        ₹{sub.price}
+                      </td>
+                      <td className="p-4">{statusBadge}</td>
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() =>
+                            handleDelete(sub.id || sub._id, sub.price)
+                          }
+                          className="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+
+              {/* If no subscriptions exist */}
+              {(!subscriptions || subscriptions.length === 0) && (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="p-8 text-center text-slate-400 italic"
+                  >
+                    No active subscriptions found. Click "+ Add Subscription" to
+                    start tracking.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Metrics Grid */}

@@ -22,6 +22,12 @@ const subscriptionSchema = new mongoose.Schema(
         "Other",
       ],
     },
+
+    date: {
+      type: Date,
+      required: true,
+    },
+
     price: {
       type: Number,
       required: true,
